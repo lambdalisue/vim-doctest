@@ -1,0 +1,83 @@
+*doctest.txt*				Asynchronous doctest runner/viewer
+
+Version: 0.1.0-dev
+Author:  Alisue <lambdalisue@hashnote.net>
+Support: Vim 8.0.0107 and above
+Support: Neovim 0.2.0 and above
+License: MIT License (See LICENSE)
+
+
+=============================================================================
+CONTENTS					*doctest-contents*
+
+INTRODUCTION			|doctest-introduction|
+USAGE				|doctest-usage|
+
+
+=============================================================================
+INTRODUCTION					*doctest-introduction*
+
+*doctest.vim* (doctest) execute Python's doctest asynchronously and record
+failures into |location-list|.
+
+Latest version:~
+https://github.com/lambdalisue/doctest.vim
+
+
+=============================================================================
+USAGE						*doctest-usage*
+
+Execute |:Doctest| command on a file which contains doctest.
+Then the doctest runs asynchronously and once all tests are completed, it
+sends the failures into |location-list|.
+
+It emits |QuickFixCmdPre| and |QuickFixCmdPost| with 'lDoctest'. So if you
+want to automatically opens the |location-list|, use |QuickFixCmdPost|
+autocmd with 'lDoctest' like:
+>
+	augroup doctest
+	  autocmd! *
+	  autocmd QuickFixCmdPost lDoctest nested lwindow
+	augroup END
+<
+
+=============================================================================
+INTERFACE					*doctest-interface*
+
+-----------------------------------------------------------------------------
+COMMAND						*doctest-command*
+
+					*:Doctest*
+:Doctest {options}
+	Run Python's doctest and send results into |location-list|.
+	It execute the following command asynchronously.
+>
+	python -m doctest {options} {filename}
+<
+	Note that {options} which changes output format are not supported.
+	See the official doctest documents for available options.
+	https://docs.python.org/3.6/library/doctest.html#option-flags
+
+-----------------------------------------------------------------------------
+VARIABLE					*doctest-variable*
+
+					*g:doctest#runner#python*
+g:doctest#runner#python
+	Python executable name or path.
+	Default: "python"
+
+-----------------------------------------------------------------------------
+MAPPING						*doctest-mapping*
+
+The following mapping become available on |quickfix| or |location-list|.
+
+	p	||<Plug>(doctest-show-detail)|
+
+					*<Plug>(doctest-show-detail)*
+<Plug>(doctest-show-detail)
+	Only available when 'filetype' is "qf".
+	Open a |previewwindow| to show the failure detail under the cursor.
+	
+
+=============================================================================
+vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl
