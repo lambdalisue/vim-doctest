@@ -1,8 +1,11 @@
 function! s:show_detail() abort
   let wininfo = getwininfo(win_getid())[0]
   let info = wininfo.loclist
-        \ ? getloclist(0, {'context': 1, 'nr': 0})
-        \ : getqflist({'context': 1, 'nr': 0})
+        \ ? getloclist(0, {'context': 1, 'nr': 0, 'title': 1})
+        \ : getqflist({'context': 1, 'nr': 0, 'title': 1})
+  if info.title !=# 'doctest'
+    return
+  endif
   let line = line('.')
   let item = get(info.context, line - 1, v:null)
   try
