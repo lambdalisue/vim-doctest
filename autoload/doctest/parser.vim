@@ -24,27 +24,35 @@ function! s:parse_next(content, start) abort
         \)
   let file = m[1]
   let line = m[2] + 0
-  let [index, exp] = s:parse_exp(a:content, index)
-  let [index, got] = s:parse_got(a:content, index)
+  let head = match(a:content, '^\w', index, 2)
+  let tail = match(a:content, '^\*\{70\}', head)
+  let content = a:content[head : tail - 1]
+
+  if match(content, '^Expected:$') > -1
+    let b = match(content, '^\w', 0, 2)
+    let c = match(content, '^\w', 0, 3)
+    let exp = content[b : c-1]
+    let got = content[c :]
+    let type = 'fail'
+    let summary = printf(
+          \ 'Fail: %s',
+          \ s:summarize(exp, got),
+          \)
+  else
+    let type = 'error'
+    let summary = printf(
+          \ 'Error: %s',
+          \ matchstr(content[-1], '^\s\+\zs.*'),
+          \)
+  endif
   let item = {
         \ 'file': file,
         \ 'line': line,
-        \ 'summary': s:summarize(exp, got),
-        \ 'content': exp + [''] + got,
+        \ 'type': type,
+        \ 'summary': summary,
+        \ 'content': content,
         \}
   return [index+1, item]
-endfunction
-
-function! s:parse_exp(content, start) abort
-  let s = match(a:content, '^Expected:', a:start)
-  let e = match(a:content, '^Got:', s)
-  return [e-1, a:content[s : e-1]]
-endfunction
-
-function! s:parse_got(content, start) abort
-  let s = match(a:content, '^Got:', a:start)
-  let e = match(a:content, '^\*\{70\}', s)
-  return [e-1, a:content[s : e-1]]
 endfunction
 
 function! s:summarize(exp, got) abort
